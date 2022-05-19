@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-			    sh "sudo aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin ${awsid}.dkr.ecr.us-east-1.amazonaws.com"
+                sh "sudo aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin ${awsid}.dkr.ecr.us-east-1.amazonaws.com"
                 sh "sudo docker build -t sample-app:latest ."
                 sh "sudo docker tag sample-app:latest ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
                 sh "sudo docker push ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
@@ -18,9 +18,15 @@ pipeline {
         stage('deploy to app host') {
             steps
                 {
+	        # This section Logins to the ECR repository from APP Instance. It check if container is running then closes and removes it to spin up a new one.
+		# The below script spins up the container if it is not running
+			
                 sh '''
                 pwd
-                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
+		ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
+		"sudo aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin ${awsid}.dkr.ecr.us-east-1.amazonaws.com"
+                
+		ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
                 "[[ ! $(sudo docker ps -a -f    "name=app" --format '{{.Names}}') == app ]] || sudo docker rm app --force"
                
                 ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
