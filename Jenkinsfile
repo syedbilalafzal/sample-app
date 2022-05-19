@@ -34,10 +34,10 @@ pipeline {
 		ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
                 "[[ ! $(sudo docker ps -a -f    "name=app" --format '{{.Names}}') == app ]] || sudo docker rm app --force"
                
-                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
+                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
                 "sudo docker pull ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest" 
                 
-                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
+                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
                 sudo docker run --name app -d -p 8080:8081 ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest
                 '''
             }
