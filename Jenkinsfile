@@ -9,9 +9,10 @@ pipeline {
         }
         stage('Build') {
             steps {
+			    sh "sudo aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin ${awsid}.dkr.ecr.us-east-1.amazonaws.com"
                 sh "sudo docker build -t sample-app:latest ."
-                sh "sudo docker tag sample-app:latest 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
-                sh "sudo docker push 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
+                sh "sudo docker tag sample-app:latest ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
+                sh "sudo docker push ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest"
             }
         }
         stage('deploy to app host') {
@@ -23,10 +24,10 @@ pipeline {
                 "[[ ! $(sudo docker ps -a -f    "name=app" --format '{{.Names}}') == app ]] || sudo docker rm app --force"
                
                 ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
-                "sudo docker pull 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest" 
+                "sudo docker pull ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest" 
                 
                 ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
-                sudo docker run --name app -d -p 8080:8081 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest
+                sudo docker run --name app -d -p 8080:8081 ${awsid}.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest
                 '''
             }
 
