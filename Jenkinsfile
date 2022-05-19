@@ -5,7 +5,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'github_credentials',
                     url: 'https://github.com/syedbilalafzal/sample-app.git'            }
         }
         stage('Build') {
@@ -20,13 +19,13 @@ pipeline {
                 {
                 sh '''
                 pwd
-                ssh root@10.0.2.205 -i /var/lib/jenkins/.ssh/jenkins_key id \
+                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins -o StrictHostKeyChecking=no \
                 "[[ ! $(sudo docker ps -a -f    "name=app" --format '{{.Names}}') == app ]] || sudo docker rm app --force"
                
-                ssh root@10.0.2.205 -i /var/lib/jenkins/.ssh/jenkins_key \
+                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
                 "sudo docker pull 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest" 
                 
-                ssh root@10.0.2.205 -i /var/lib/jenkins/.ssh/jenkins_key \
+                ssh root@app -i /var/lib/jenkins/.ssh/id_rsa_jenkins \
                 sudo docker run --name app -d -p 8080:8081 323721060456.dkr.ecr.us-east-1.amazonaws.com/sample-app:latest
                 '''
             }
