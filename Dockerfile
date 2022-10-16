@@ -10,4 +10,7 @@ RUN npm install --production
 
 COPY . .
 
+RUN groupadd -r user && useradd -r -g user user
+USER user
+
 CMD [ "node", "server.js" ]
